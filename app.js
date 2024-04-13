@@ -1,18 +1,28 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const userRoutes = require('./routes/userRoutes');
+const axios = require('axios');
 
 const app = express();
 
-app.use(bodyParser.json());
+// Define a new GET route for fetching holdings
+app.get('/holdings', async (req, res) => {
+  try {
+    // Make a GET request to Upstox's API endpoint for fetching holdings
+    const response = await axios.get('https://api.upstox.com/live/v1/holdings', {
+      headers: {
+        'X-API-KEY': 'your-api-key',
+        'Authorization': 'Bearer your-access-token'
+      }
+    });
 
-mongoose.connect('mongodb://localhost/roomBookingApp', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+    // Return the response data as JSON
+    res.json(response.data);
+  } catch (error) {
+    // If there's an error, return an error response
+    res.status(500).json({ error: error.message });
+  }
+});
 
-app.use('/api/users', userRoutes);
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Start the Express.js server
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
